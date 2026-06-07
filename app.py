@@ -58,11 +58,9 @@ model = load_lstm()
 
 FEATURES = [
     'open', 'high', 'low', 'close',
-    'volume', 'adjclose',
-    'MA20', 'MA50',
-    'ROC', 'STD20',
-    'HL_diff', 'CO_diff'
+    'volume', 'adjclose'
 ]
+
 TARGET_IDX = FEATURES.index('adjclose')
 LOOKBACK = 90
 scaler = MinMaxScaler()
