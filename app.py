@@ -1,7 +1,6 @@
- ============================================================
+ # ============================================================
 # DASHBOARD
 # File: app.py
-# Run: streamlit run app.py
 # ============================================================
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -11,7 +10,6 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import yfinance as yf
 from sklearn.preprocessing import MinMaxScaler
 
 st.set_page_config(
@@ -35,32 +33,21 @@ def load_lstm():
     )
     return model
 
-# ── LOAD LIVE DATA ───────────────────────────────────────────
+# ── LOAD DATA ────────────────────────────────────────────────
 @st.cache_data
 def load_data():
-    df = yf.download(
-        'GOOG',
-        start='2018-01-01',
-        end=pd.Timestamp.today().strftime('%Y-%m-%d')
-    )
-    df = df.reset_index()
-    df.columns = [
-        'date', 'open', 'high',
-        'low', 'close', 'adjclose', 'volume'
-    ]
+    df = pd.read_csv('Google_Stock_Price.csv')
+    df['date'] = pd.to_datetime(df['date'])
     df = df.sort_values('date').reset_index(drop=True)
     df.dropna(inplace=True)
     return df
 
-# ── LOADING ──────────────────────────────────────────────────
-with st.spinner('Loading model and live data...'):
+# ── LOADING MESSAGE ──────────────────────────────────────────
+with st.spinner('Loading model... please wait'):
     model = load_lstm()
     df = load_data()
 
 st.success('Model loaded successfully!')
-
-# ── SHOW LATEST DATA DATE ────────────────────────────────────
-st.markdown(f"📅 **Data updated up to:** {df['date'].iloc[-1].strftime('%B %d, %Y')}")
 
 # ── INITIALIZE ───────────────────────────────────────────────
 FEATURES = [
@@ -159,7 +146,7 @@ st.subheader("📋 Forecast Table")
 forecast_df = pd.DataFrame({
     'Date' : future_dates.strftime('%Y-%m-%d'),
     'Predicted Price' : [f"${p:.2f}" for p in future_prices],
-    'Change from Today': [f"${p - last_price:+.2f}"
+    'Change from Today': [f"${p - last_price:+.2f}" 
                           for p in future_prices]
 })
 st.dataframe(forecast_df, use_container_width=True)
@@ -174,4 +161,3 @@ st.download_button(
 
 st.markdown("---")
 st.markdown("Built by **Habiba** | LSTM Stock Forecasting")
-
